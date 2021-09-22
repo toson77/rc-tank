@@ -1,6 +1,7 @@
-[submodule "server/nanoweb"]
-	path = server/nanoweb
-	url = https://github.com/puhitaku/micropython-nanoweb.git
 [submodule "server/serial"]
 	path = server/serial
 	url = https://github.com/iRobotEducation/micropython-serial
+[submodule "server/nanoweb"]
+	path = server/nanoweb
+	url = https://github.com/puhitaku/micropython-nanoweb.git
+	branch = puhitaku/segment
