@@ -5,21 +5,23 @@ from nanoweb.nanoweb import Nanoweb, send_file
 from serial.serial import Serial
 
 try:
-        s = Serial('/dev/ttyACM0', 115200, timeout=1)
+    s = Serial('/dev/ttyACM0', 115200, timeout=0.5)
 except OSError:
-        try:
-                print("change ttyACM1")
-                s = Serial('/dev/ttyACM1', 115200, timeout=1)
-        except OSError as e:
-                print(e)
-                exit()
+    try:
+        print("change ttyACM1")
+        s = Serial('/dev/ttyACM1', 115200, timeout=0.5)
+    except OSError as e:
+        print(e)
+        exit()
 
 app = Nanoweb(port=8080)
 op = 's'
 
+
 def log(fmt, *args):
     t = time.localtime()
     print('[{}]'.format(time.strftime('%Y-%m-%d %H:%M:%S')), fmt.format(*args))
+
 
 def respond(fn):
     """A mixin decorator to simplify handlers like Flask"""
@@ -49,60 +51,63 @@ def respond(fn):
 
     return wrapper
 
+
 @app.route('/operation')
 @respond
 async def operation(req):
-        global op
-        if req.method == 'GET':
-                return 200, {'operation': op, 'error': None}
-        elif req.method == 'PUT':
-                content_type = req.headers.get('Content-Type')
-                if content_type != 'application/json':
-                        return 400, {'operation': op, 'error': 'bad request, incorrect content type'}
+    global op
+    if req.method == 'GET':
+        return 200, {'operation': op, 'error': None}
+    elif req.method == 'PUT':
+        content_type = req.headers.get('Content-Type')
+        if content_type != 'application/json':
+            return 400, {'operation': op, 'error': 'bad request, incorrect content type'}
 
-                content_len = req.headers.get('Content-Length')
-                if content_len is None:
-                        return 400, {'operation': op, 'error': 'bad request, no request body'}
+        content_len = req.headers.get('Content-Length')
+        if content_len is None:
+            return 400, {'operation': op, 'error': 'bad request, no request body'}
 
-                # read the request body only as long as the content-length.
-                body_bytes = await req.read(int(content_len))
-                body = json.loads(body_bytes.decode())
-                if 'operation' not in body:
-                        return 400, {'operation': op, 'error': 'bad request, lacks operation key'}
+        # read the request body only as long as the content-length.
+        body_bytes = await req.read(int(content_len))
+        body = json.loads(body_bytes.decode())
+        if 'operation' not in body:
+            return 400, {'operation': op, 'error': 'bad request, lacks operation key'}
 
-                op = body['operation']
-                s.write(op)
-                return 200, {'operation': op, 'error': None}
-        else:
-                return 405, {'operation': op, 'error': 'method not allowed'}
+        op = body['operation']
+        s.write(op)
+        return 200, {'operation': op, 'error': None}
+    else:
+        return 405, {'operation': op, 'error': 'method not allowed'}
+
 
 @app.route('/speed')
 @respond
 async def speed(req):
-        global op
-        if req.method == 'GET':
-                return 200, {'operation': op, 'error': None}
-        elif req.method == 'PUT':
-                content_type = req.headers.get('Content-Type')
-                if content_type != 'application/json':
-                        return 400, {'operation': op, 'error': 'bad request, incorrect content type'}
+    global op
+    if req.method == 'GET':
+        return 200, {'operation': op, 'error': None}
+    elif req.method == 'PUT':
+        content_type = req.headers.get('Content-Type')
+        if content_type != 'application/json':
+            return 400, {'operation': op, 'error': 'bad request, incorrect content type'}
 
-                content_len = req.headers.get('Content-Length')
-                if content_len is None:
-                        return 400, {'operation': op, 'error': 'bad request, no request body'}
+        content_len = req.headers.get('Content-Length')
+        if content_len is None:
+            return 400, {'operation': op, 'error': 'bad request, no request body'}
 
-                # read the request body only as long as the content-length.
-                body_bytes = await req.read(int(content_len))
-                body = json.loads(body_bytes.decode())
-                if 'operation' not in body:
-                        return 400, {'operation': op, 'error': 'bad request, lacks operation key'}
+        # read the request body only as long as the content-length.
+        body_bytes = await req.read(int(content_len))
+        body = json.loads(body_bytes.decode())
+        if 'operation' not in body:
+            return 400, {'operation': op, 'error': 'bad request, lacks operation key'}
 
-                op = body['operation']
-                s.write(op)
-                current_speed = s.read(size=16)
-                return 200, {'operation': op,'current-speed': current_speed.decode(), 'error': None}
-        else:
-                return 405, {'operation': op, 'error': 'method not allowed'}
+        op = body['operation']
+        s.write(op)
+        current_speed = s.read(size=16)
+        return 200, {'operation': op, 'current-speed': current_speed.decode(), 'error': None}
+    else:
+        return 405, {'operation': op, 'error': 'method not allowed'}
+
 
 @app.route('/healthz')
 @respond
@@ -136,7 +141,6 @@ app.routes.update(
     {
         '/': send_static,
         '/index.html': send_static,
-        '/simple.html': send_static,
         '/assets/*': send_static,
     }
 )
