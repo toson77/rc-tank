@@ -1,6 +1,0 @@
-[submodule "serial"]
-	path = serial
-	url = https://github.com/iRobotEducation/micropython-serial.git
-[submodule "nanoweb"]
-	path = nanoweb
-	url = https://github.com/puhitaku/micropython-nanoweb.git
