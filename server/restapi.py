@@ -1,5 +1,6 @@
 import uasyncio
 import json
+import sys
 import time
 from nanoweb.nanoweb import Nanoweb, send_file
 from serial.serial import Serial
@@ -12,7 +13,7 @@ except OSError:
         s = Serial('/dev/ttyACM1', 115200, timeout=1)
     except OSError as e:
         print(e)
-        exit()
+        sys.exit(1)
 
 app = Nanoweb(port=8080)
 op = 's'
