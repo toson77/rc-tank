@@ -5,11 +5,11 @@ from nanoweb.nanoweb import Nanoweb, send_file
 from serial.serial import Serial
 
 try:
-    s = Serial('/dev/ttyACM0', 115200, timeout=0.5)
+    s = Serial('/dev/ttyACM0', 115200, timeout=1)
 except OSError:
     try:
         print("change ttyACM1")
-        s = Serial('/dev/ttyACM1', 115200, timeout=0.5)
+        s = Serial('/dev/ttyACM1', 115200, timeout=1)
     except OSError as e:
         print(e)
         exit()
