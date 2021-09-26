@@ -4,7 +4,9 @@ import sys
 import time
 from nanoweb.nanoweb import Nanoweb, send_file
 from serial.serial import Serial
-
+from sqlite3.sqlite3 import *
+conn = connect('operation.db')
+cur = conn.cursor()
 try:
     s = Serial('/dev/ttyACM0', 115200, timeout=1)
 except OSError:
@@ -80,6 +82,9 @@ def operation(read=False):
                     current_speed = s.read(size=16)
                     return 200, {'operation': op, 'current-speed': current_speed.decode(), 'error': None}
                 else:
+                    print(type(op))
+                    cur.execute(
+                        "INSERT INTO operation(operation) values(%s)", (op,))
                     return 200, {'operation': op, 'error': None}
             else:
                 return 405, {'operation': op, 'error': 'method not allowed'}
@@ -99,6 +104,35 @@ def test():
 @operation(read=True)
 def test2():
     return
+
+
+@app.route('/history')
+@respond
+async def gethistory(req):
+    global op
+    if req.method == 'GET':
+        cur.execute('SELECT * FROM operation')
+        text = cur.fetchone()
+        print(text)
+        return 200, {'operation': op, 'history': text, 'error': None}
+    elif req.method == 'PUT':
+        content_type = req.headers.get('Content-Type')
+        if content_type != 'application/json':
+            return 400, {'operation': op, 'error': 'bad request, incorrect content type'}
+
+        content_len = req.headers.get('Content-Length')
+        if content_len is None:
+            return 400, {'operation': op, 'error': 'bad request, no request body'}
+
+        # read the request body only as long as the content-length.
+        body_bytes = await req.read(int(content_len))
+        body = json.loads(body_bytes.decode())
+        if 'operation' not in body:
+            return 400, {'operation': op, 'error': 'bad request, lacks operation key'}
+        else:
+            return 200, {'operation': op, 'error': None}
+    else:
+        return 405, {'operation': op, 'error': 'method not allowed'}
 
 
 @app.route('/healthz')

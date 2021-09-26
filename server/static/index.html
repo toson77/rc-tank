@@ -52,13 +52,15 @@
                                 <button class="btn btn-success" v-on:click="putDirection('f')">↑</button>
                                 <div class="btn disabled"></div>
                                 <button class="btn btn-success" v-on:click="putSpeed('+')">+</button>
+                                <button class="btn btn-secondary" v-on:click="getHistory">getHistory</button>
                             </div>
                             <br>
                             <div class="btn-group" role="group">
                                 <button class="btn btn-success" v-on:click="putDirection('l')">←</button>
-                                <button class="btn btn-success" v-on:click="putDirection('s')">Stop</button>
+                                <button class="btn btn-secondary" v-on:click="putDirection('s')">Stop</button>
                                 <button class="btn btn-success" v-on:click="putDirection('r')">→</button>
                                 <p class="btn disabled fs-2">{{speedVal}} </p>
+                                <p class="btn disabled">{{history}}</p>
                             </div>
                             <br>
                             <div class="btn-group" role="group">
@@ -66,6 +68,7 @@
                                 <button class="btn btn-success" v-on:click="putDirection('b')">↓</button>
                                 <div class="btn disabled"></div>
                                 <button class="btn btn-success" v-on:click="putSpeed('-')">-</button>
+                                <div class="btn disabled"></div>
                             </div>
                         </div>
                     </div>
@@ -79,6 +82,7 @@
         data: function () {
             return {
                 speedVal: '70',
+                history:[]
             }
         },
         methods: {
@@ -115,7 +119,26 @@
                     });
                 this.speedVal = res.data["current-speed"];
                 console.log(res.data)
+            },
+            getHistory: async function () {
+                const res = await axios.get(document.location.origin + "/history", {
+                },
+                    {
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    })
+                    .catch(function (err) {
+                        if (err.responce) {
+                            console.log(err.responce)
+                        }
+                    });
+                this.history = res.data["history"];
+                console.log(res.data)
             }
+
+
+
         }
     })
 </script>
