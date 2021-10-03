@@ -111,10 +111,15 @@ def test2():
 async def gethistory(req):
     global op
     if req.method == 'GET':
+        history = []
         cur.execute('SELECT * FROM operation')
-        text = cur.fetchone()
-        print(text)
-        return 200, {'operation': op, 'history': text, 'error': None}
+        while(1):
+            text = cur.fetchone()
+            print(text)
+            if text is None:
+                break
+            history.append(text)
+        return 200, {'operation': op, 'history': history, 'error': None}
     elif req.method == 'PUT':
         content_type = req.headers.get('Content-Type')
         if content_type != 'application/json':
@@ -129,8 +134,20 @@ async def gethistory(req):
         body = json.loads(body_bytes.decode())
         if 'operation' not in body:
             return 400, {'operation': op, 'error': 'bad request, lacks operation key'}
-        else:
-            return 200, {'operation': op, 'error': None}
+        elif op == 'f':
+            return 200, {'operation': 'forword', 'error': None}
+        elif op == 's':
+            return 200, {'operation': 'stop', 'error': None}
+        elif op == 'b':
+            return 200, {'operation': 'back', 'error': None}
+        elif op == 'r':
+            return 200, {'operation': 'right', 'error': None}
+        elif op == 'l':
+            return 200, {'operation': 'left', 'error': None}
+        elif op == '+':
+            return 200, {'operation': 'speedup', 'error': None}
+        elif op == '-':
+            return 200, {'operation': 'speeddown', 'error': None}
     else:
         return 405, {'operation': op, 'error': 'method not allowed'}
 
